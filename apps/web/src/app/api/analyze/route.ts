@@ -1,88 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
-      address = 'Unknown Property',
-      purchasePrice = 0, downPaymentPct = 20, interestRate = 7.0,
-      loanTermYears = 30, monthlyRent = 0, vacancyRatePct = 8,
-      expensesPct = 40, repairCosts = 0,
+      address = 'Unknown', purchasePrice = 200000, downPaymentPct = 20,
+      interestRate = 7.0, loanTermYears = 30, monthlyRent = 1800,
+      vacancyRatePct = 8, expensesPct = 40, repairCosts = 0,
+      propertyType = 'single_family'
     } = body
 
-    // Core financial calculations
-    const dp = purchasePrice * (downPaymentPct / 100)
-    const loan = purchasePrice - dp
-    const mr = interestRate / 100 / 12
+    const downPayment = purchasePrice * (downPaymentPct / 100)
+    const loanAmount = purchasePrice - downPayment
+    const r = interestRate / 100 / 12
     const n = loanTermYears * 12
-    const mortgage = loan * (mr * Math.pow(1+mr,n)) / (Math.pow(1+mr,n)-1)
-    const effRent = monthlyRent * (1 - vacancyRatePct/100)
-    const monthlyExp = effRent * (expensesPct/100)
-    const noi = (effRent - monthlyExp) * 12
-    const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0
-    const monthlyCF = effRent - monthlyExp - mortgage
-    const annualCF = monthlyCF * 12
-    const cashIn = dp + repairCosts
-    const coc = cashIn > 0 ? (annualCF / cashIn) * 100 : 0
-    const grm = monthlyRent > 0 ? purchasePrice / (monthlyRent * 12) : 0
-    const dscr = mortgage > 0 ? noi / (mortgage * 12) : 0
+    const monthlyMortgage = loanAmount * (r * Math.pow(1+r,n)) / (Math.pow(1+r,n)-1)
+    const effectiveRent = monthlyRent * (1 - vacancyRatePct/100)
+    const monthlyExpenses = effectiveRent * (expensesPct/100)
+    const noi = (effectiveRent - monthlyExpenses) * 12
+    const capRate = (noi / purchasePrice) * 100
+    const monthlyCashFlow = effectiveRent - monthlyExpenses - monthlyMortgage
+    const cashInvested = downPayment + repairCosts
+    const cashOnCash = (monthlyCashFlow * 12 / cashInvested) * 100
+    const grm = purchasePrice / (monthlyRent * 12)
+    const dscr = noi / (monthlyMortgage * 12)
 
-    // Score logic (no external API needed for MVP)
-    let score = 50
-    if (capRate >= 8) score += 20
-    else if (capRate >= 6) score += 10
-    else if (capRate < 4) score -= 20
-    if (coc >= 10) score += 15
-    else if (coc >= 7) score += 8
-    else if (coc < 0) score -= 25
-    if (dscr >= 1.25) score += 10
-    else if (dscr < 1.0) score -= 20
-    if (grm <= 10) score += 5
-    score = Math.max(1, Math.min(100, score))
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    const msg = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 800,
+      messages: [{
+        role: 'user',
+        content: `You are an expert real estate investment analyst for Midwest/Missouri markets. Analyze this deal concisely.
 
-    const verdict = score >= 70 ? 'BUY' : score >= 50 ? 'NEGOTIATE' : 'PASS'
-    const verdictColor = score >= 70 ? 'green' : score >= 50 ? 'amber' : 'red'
+PROPERTY: ${address} | Type: ${propertyType}
+Purchase: $${purchasePrice.toLocaleString()} | Down: ${downPaymentPct}% | Rate: ${interestRate}% | Rent: $${monthlyRent}/mo
 
-    const strengths = []
-    const redFlags = []
-    if (capRate >= 7) strengths.push(`Strong ${capRate.toFixed(1)}% cap rate exceeds Midwest avg of 6%`)
-    if (coc >= 8) strengths.push(`Excellent ${coc.toFixed(1)}% cash-on-cash return`)
-    if (monthlyCF > 200) strengths.push(`Solid $${Math.round(monthlyCF)}/mo positive cash flow`)
-    if (dscr >= 1.2) strengths.push(`Safe ${dscr.toFixed(2)} DSCR — lender-ready`)
-    if (grm <= 11) strengths.push(`Favorable ${grm.toFixed(1)}x GRM for Missouri market`)
-    if (capRate < 5) redFlags.push(`Low ${capRate.toFixed(1)}% cap rate — below market`)
-    if (coc < 5) redFlags.push(`Weak cash-on-cash return of ${coc.toFixed(1)}%`)
-    if (monthlyCF < 0) redFlags.push(`Negative cash flow of $${Math.round(monthlyCF)}/mo`)
-    if (dscr < 1.1) redFlags.push(`DSCR ${dscr.toFixed(2)} — lender concern below 1.25`)
-    if (strengths.length === 0) strengths.push('Review deal terms for improvement opportunities')
+METRICS: Cap Rate: ${capRate.toFixed(2)}% | CoC: ${cashOnCash.toFixed(2)}% | Cash Flow: $${monthlyCashFlow.toFixed(0)}/mo | DSCR: ${dscr.toFixed(2)} | GRM: ${grm.toFixed(1)}
+
+Respond ONLY with valid JSON (no markdown):
+{"dealScore":78,"verdict":"BUY","summary":"2-3 sentences","strengths":["s1","s2","s3"],"redFlags":["r1","r2"],"recommendations":"2 sentences","marketContext":"1 sentence about midwest market","exitStrategies":["e1","e2"]}`
+      }]
+    })
+
+    const rawText = (msg.content[0] as any).text.trim()
+    const ai = JSON.parse(rawText)
 
     return NextResponse.json({
       metrics: {
-        capRate: +capRate.toFixed(2),
-        cashOnCash: +coc.toFixed(2),
-        monthlyCashFlow: +monthlyCF.toFixed(0),
-        annualCashFlow: +annualCF.toFixed(0),
-        noi: +noi.toFixed(0),
-        grm: +grm.toFixed(1),
-        dscr: +dscr.toFixed(2),
-        monthlyMortgage: +mortgage.toFixed(0),
-        downPayment: +dp.toFixed(0),
-        loanAmount: +loan.toFixed(0),
+        capRate: +capRate.toFixed(2), cashOnCash: +cashOnCash.toFixed(2),
+        monthlyCashFlow: +monthlyCashFlow.toFixed(0), annualCashFlow: +(monthlyCashFlow*12).toFixed(0),
+        noi: +noi.toFixed(0), grm: +grm.toFixed(1), dscr: +dscr.toFixed(2),
+        monthlyMortgage: +monthlyMortgage.toFixed(0), downPayment, loanAmount
       },
-      ai: {
-        dealScore: score,
-        verdict,
-        verdictColor,
-        summary: `${address} scores ${score}/100 — ${verdict}. Cap rate ${capRate.toFixed(1)}%, CoC ${coc.toFixed(1)}%, monthly cash flow $${Math.round(monthlyCF)}.`,
-        strengths: strengths.slice(0,3),
-        redFlags: redFlags.slice(0,3),
-        recommendations: score >= 70
-          ? `Strong deal for the Missouri market. Consider locking rate and moving fast.`
-          : score >= 50
-          ? `Negotiate 5-8% below ask or request seller concessions to improve returns.`
-          : `Deal does not pencil at current price. Need lower purchase price or higher rents.`,
-        exitStrategies: ['Buy & Hold (rental income)', 'BRRRR Strategy', 'Flip if ARV supports it'],
-      }
+      ai
     })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })

@@ -7,3 +7,6 @@ CLAUDE.local.md
 dist/
 .vercel/
 *.log
+apps/web/.env.local
+apps/web/.next/
+apps/web/node_modules/
