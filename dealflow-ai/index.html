@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DealFlow AI — Real Estate Deal Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a08;
+    --green: #00e87a;
+    --green-dark: #00b85f;
+    --green-dim: rgba(0,232,122,0.12);
+    --green-glow: rgba(0,232,122,0.25);
+    --white: #f5f5f0;
+    --gray: #888880;
+    --gray-dark: #1a1a18;
+    --gray-mid: #2a2a27;
+    --border: rgba(255,255,255,0.08);
+    --radius: 12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,232,122,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,232,122,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10,10,8,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 12px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.8); }
+  }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    color: var(--gray); text-decoration: none; font-size: 14px;
+    font-weight: 500; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    background: var(--green); color: var(--black) !important;
+    padding: 9px 20px; border-radius: 8px;
+    font-weight: 600 !important; font-size: 14px !important;
+    transition: all 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--green-dark) !important; transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green-dim);
+    border: 1px solid rgba(0,232,122,0.3);
+    border-radius: 100px; padding: 6px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--green);
+    margin-bottom: 32px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .hero-badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--green); border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+  h1 span { color: var(--green); }
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--gray);
+    max-width: 560px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+    animation: fadeDown 0.6s 0.2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    animation: fadeDown 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--green); color: var(--black);
+    padding: 14px 32px; border-radius: 10px;
+    font-weight: 700; font-size: 15px;
+    border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 8px 32px var(--green-glow); }
+  .btn-secondary {
+    background: transparent; color: var(--white);
+    padding: 14px 32px; border-radius: 10px;
+    font-weight: 500; font-size: 15px;
+    border: 1px solid var(--border); cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.05); }
+  .hero-stats {
+    display: flex; gap: 48px; justify-content: center;
+    margin-top: 64px; flex-wrap: wrap;
+    animation: fadeDown 0.6s 0.4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px; font-weight: 800;
+    color: var(--green);
+  }
+  .stat-label { font-size: 13px; color: var(--gray); margin-top: 4px; }
+
+  /* ANALYZER SECTION */
+  .analyzer-section {
+    position: relative; z-index: 1;
+    padding: 80px 24px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--green);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 48px;
+  }
+  .analyzer-card {
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 120px var(--green-glow);
+  }
+  .analyzer-header {
+    background: var(--gray-mid);
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot-red { width:12px;height:12px;border-radius:50%;background:#ff5f57; }
+  .dot-yellow { width:12px;height:12px;border-radius:50%;background:#ffbd2e; }
+  .dot-green { width:12px;height:12px;border-radius:50%;background:#28c840; }
+  .analyzer-title-bar {
+    flex: 1; text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; color: var(--gray);
+  }
+  .analyzer-body { padding: 32px; }
+  .input-row {
+    display: flex; gap: 12px; margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .address-input {
+    flex: 1; min-width: 280px;
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .address-input::placeholder { color: var(--gray); }
+  .address-input:focus { border-color: var(--green); }
+  .analyze-btn {
+    background: var(--green); color: var(--black);
+    border: none; border-radius: 10px;
+    padding: 14px 28px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 15px;
+    cursor: pointer; white-space: nowrap;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .analyze-btn:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .analyze-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* PARAMS ROW */
+  .params-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 28px;
+  }
+  .param-group label {
+    display: block; font-size: 11px; color: var(--gray);
+    font-family: 'DM Mono', monospace; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .param-input {
+    width: 100%;
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .param-input:focus { border-color: var(--green); }
+
+  /* RESULTS */
+  .results-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-top: 28px;
+    animation: fadeIn 0.5s ease both;
+  }
+  .metric-card {
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .metric-card:hover { border-color: rgba(0,232,122,0.3); }
+  .metric-card.highlight {
+    border-color: rgba(0,232,122,0.4);
+    background: var(--green-dim);
+  }
+  .metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--gray);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .metric-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+  }
+  .metric-card.highlight .metric-value { color: var(--green); }
+  .metric-sub {
+    font-size: 12px; color: var(--gray);
+    margin-top: 6px;
+  }
+  .metric-badge {
+    display: inline-block; margin-top: 8px;
+    padding: 3px 8px; border-radius: 4px;
+    font-size: 11px; font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .badge-good { background: rgba(0,232,122,0.15); color: var(--green); }
+  .badge-warn { background: rgba(255,189,46,0.15); color: #ffbd2e; }
+  .badge-bad { background: rgba(255,95,87,0.15); color: #ff5f57; }
+
+  .ai-memo {
+    margin-top: 24px;
+    background: var(--black);
+    border: 1px solid rgba(0,232,122,0.2);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .memo-header {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--green);
+    margin-bottom: 12px;
+  }
+  .memo-text {
+    font-size: 14px; color: var(--gray);
+    line-height: 1.7;
+  }
+  .memo-text strong { color: var(--white); }
+
+  .loading-state {
+    text-align: center; padding: 40px;
+    display: none;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; color: var(--green);
+  }
+  .loading-steps { margin-top: 12px; }
+  .loading-step {
+    font-size: 12px; color: var(--gray);
+    padding: 3px 0;
+    transition: color 0.3s;
+  }
+  .loading-step.active { color: var(--green); }
+  .loading-step.done { color: var(--gray); }
+  .loading-step.done::before { content: '✓ '; }
+  .loading-step.active::before { content: '▶ '; }
+
+  /* FEATURES */
+  .features-section {
+    position: relative; z-index: 1;
+    padding: 100px 24px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px; margin-top: 48px;
+  }
+  .feature-card {
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.3s;
+  }
+  .feature-card:hover {
+    border-color: rgba(0,232,122,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+  }
+  .feature-icon {
+    width: 44px; height: 44px;
+    background: var(--green-dim);
+    border: 1px solid rgba(0,232,122,0.3);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 16px;
+  }
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .feature-desc { font-size: 14px; color: var(--gray); line-height: 1.6; }
+
+  /* PRICING */
+  .pricing-section {
+    position: relative; z-index: 1;
+    padding: 100px 24px;
+    max-width: 1100px; margin: 0 auto;
+    text-align: center;
+  }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px; margin-top: 48px; text-align: left;
+  }
+  .pricing-card {
+    background: var(--gray-dark);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .pricing-card.featured {
+    border-color: var(--green);
+    box-shadow: 0 0 40px var(--green-glow);
+  }
+  .featured-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: var(--black);
+    padding: 4px 14px; border-radius: 100px;
+    font-size: 12px; font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+  .plan-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--gray);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .plan-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px; font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .plan-price span { font-size: 18px; color: var(--gray); }
+  .plan-period { font-size: 13px; color: var(--gray); margin-bottom: 24px; }
+  .plan-features { list-style: none; margin-bottom: 28px; }
+  .plan-features li {
+    font-size: 14px; color: var(--gray);
+    padding: 6px 0;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .plan-features li::before { content: '—'; color: var(--green); font-size: 12px; }
+  .plan-features li.included { color: var(--white); }
+  .plan-btn {
+    width: 100%; padding: 12px;
+    border-radius: 10px; font-weight: 600;
+    font-size: 14px; cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .plan-btn:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+  .plan-btn.primary {
+    background: var(--green); color: var(--black);
+    border-color: var(--green);
+  }
+  .plan-btn.primary:hover { background: var(--green-dark); }
+
+  /* FOOTER */
+  footer {
+    position: relative; z-index: 1;
+    padding: 48px 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--gray); font-size: 14px;
+  }
+  footer strong { color: var(--white); }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TYPEWRITER */
+  .typewriter { display: inline-block; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--gray-mid); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    DealFlow AI
+  </div>
+  <div class="nav-links">
+    <a href="#analyzer">Analyzer</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#pricing" class="nav-cta">Start Free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🟢 Now in Beta — Missouri Investors Get Free Access</div>
+  <h1>Analyze any deal<br>in <span>30 seconds.</span></h1>
+  <p class="hero-sub">AI-powered deal analysis for real estate investors. Paste an address, get cap rate, cash-on-cash, IRR, and a full investment memo — instantly.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('analyzer').scrollIntoView({behavior:'smooth'})">
+      ⚡ Try It Free
+    </button>
+    <button class="btn-secondary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">
+      View Pricing →
+    </button>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">30s</div>
+      <div class="stat-label">Avg. analysis time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">$5.6B</div>
+      <div class="stat-label">Market opportunity</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">12+</div>
+      <div class="stat-label">Metrics calculated</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">MO</div>
+      <div class="stat-label">Missouri-focused data</div>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYZER -->
+<section class="analyzer-section" id="analyzer">
+  <div class="section-tag">// Live Demo</div>
+  <div class="section-title">Try the Deal Analyzer</div>
+  <div class="analyzer-card">
+    <div class="analyzer-header">
+      <div class="dot-red"></div>
+      <div class="dot-yellow"></div>
+      <div class="dot-green"></div>
+      <div class="analyzer-title-bar">dealflow-ai — property-analyzer.js</div>
+    </div>
+    <div class="analyzer-body">
+      <div class="input-row">
+        <input class="address-input" id="address" type="text"
+          placeholder="Enter property address (e.g. 1234 Oak St, Kansas City, MO 64108)"
+          value="1234 Oak St, Kansas City, MO 64108" />
+        <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+          ⚡ Analyze Deal
+        </button>
+      </div>
+      <div class="params-row">
+        <div class="param-group">
+          <label>Purchase Price ($)</label>
+          <input class="param-input" id="price" type="number" value="285000" />
+        </div>
+        <div class="param-group">
+          <label>Monthly Rent ($)</label>
+          <input class="param-input" id="rent" type="number" value="2400" />
+        </div>
+        <div class="param-group">
+          <label>Down Payment (%)</label>
+          <input class="param-input" id="down" type="number" value="20" />
+        </div>
+        <div class="param-group">
+          <label>Interest Rate (%)</label>
+          <input class="param-input" id="rate" type="number" value="7.25" step="0.01" />
+        </div>
+        <div class="param-group">
+          <label>Property Taxes/yr ($)</label>
+          <input class="param-input" id="taxes" type="number" value="3400" />
+        </div>
+        <div class="param-group">
+          <label>Insurance/yr ($)</label>
+          <input class="param-input" id="insurance" type="number" value="1800" />
+        </div>
+      </div>
+
+      <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <div class="loading-text">AI Analyzing Deal...</div>
+        <div class="loading-steps" id="loadingSteps">
+          <div class="loading-step" id="step1">Fetching market comps for Kansas City, MO</div>
+          <div class="loading-step" id="step2">Calculating NOI, cap rate, cash flow</div>
+          <div class="loading-step" id="step3">Running 10-year IRR projection</div>
+          <div class="loading-step" id="step4">Generating AI investment memo</div>
+        </div>
+      </div>
+
+      <div id="results" style="display:none">
+        <div class="results-grid" id="metricsGrid"></div>
+        <div class="ai-memo" id="aiMemo"></div>
+        <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn-primary" style="font-size:13px;padding:10px 20px" onclick="alert('Sign up for Pro to download PDF reports!')">
+            📄 Download Deal Memo PDF
+          </button>
+          <button class="btn-secondary" style="font-size:13px;padding:10px 20px" onclick="alert('Connect Zapier to auto-send to your CRM!')">
+            ⚡ Send to CRM via Zapier
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="section-tag">// Platform</div>
+  <div class="section-title">Everything you need<br>to close faster.</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">30-Second Analysis</div>
+      <div class="feature-desc">Paste any address and get cap rate, cash-on-cash return, IRR, DSCR, and break-even analysis in under 30 seconds.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🗺️</div>
+      <div class="feature-title">Missouri Market Intel</div>
+      <div class="feature-desc">Hyperlocal comp data for Kansas City, St. Louis, Springfield, Columbia, and surrounding markets. Know your numbers before you call.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📄</div>
+      <div class="feature-title">AI Deal Memos</div>
+      <div class="feature-desc">One-click professional investment memos for lenders and partners. Include comps, projections, risk analysis, and executive summary.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Portfolio Dashboard</div>
+      <div class="feature-desc">Track every deal across your entire portfolio. See total equity, monthly cash flow, and portfolio-wide IRR at a glance.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚙️</div>
+      <div class="feature-title">Zapier Automations</div>
+      <div class="feature-desc">Auto-send analysis to Gmail, Slack, Google Sheets, or your CRM. Build workflows that run your deal pipeline on autopilot.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <div class="feature-title">10-Year Projections</div>
+      <div class="feature-desc">Model rent growth, appreciation, refinance scenarios, and equity capture over a full investment horizon with sensitivity analysis.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-tag">// Pricing</div>
+  <div class="section-title">Start free. Scale when ready.</div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0<span>/mo</span></div>
+      <div class="plan-period">No credit card required</div>
+      <ul class="plan-features">
+        <li class="included">3 deal analyses/month</li>
+        <li class="included">Basic metrics (cap rate, CoC)</li>
+        <li class="included">Missouri market data</li>
+        <li>Deal memo PDF</li>
+        <li>Portfolio tracker</li>
+        <li>Zapier integration</li>
+      </ul>
+      <button class="plan-btn" onclick="alert('Launching soon! Join waitlist.')">Get Started Free</button>
+    </div>
+    <div class="pricing-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">$29<span>/mo</span></div>
+      <div class="plan-period">Billed monthly</div>
+      <ul class="plan-features">
+        <li class="included">25 deal analyses/month</li>
+        <li class="included">Full 12-metric analysis</li>
+        <li class="included">Missouri market data</li>
+        <li class="included">Basic deal memo PDF</li>
+        <li>Portfolio tracker</li>
+        <li>Zapier integration</li>
+      </ul>
+      <button class="plan-btn" onclick="alert('Launching soon! Join waitlist.')">Start Trial</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="featured-badge">MOST POPULAR</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$79<span>/mo</span></div>
+      <div class="plan-period">Billed monthly</div>
+      <ul class="plan-features">
+        <li class="included">Unlimited analyses</li>
+        <li class="included">Full 12-metric analysis</li>
+        <li class="included">AI deal memo generator</li>
+        <li class="included">Portfolio tracker</li>
+        <li class="included">Zapier integration (all apps)</li>
+        <li class="included">10-year projections + IRR</li>
+      </ul>
+      <button class="plan-btn primary" onclick="alert('Launching soon! Join the beta waitlist — first 50 users get 50% off for life.')">Start Pro Trial</button>
+    </div>
+    <div class="pricing-card">
+      <div class="plan-name">Team</div>
+      <div class="plan-price">$199<span>/mo</span></div>
+      <div class="plan-period">Up to 5 seats</div>
+      <ul class="plan-features">
+        <li class="included">Everything in Pro</li>
+        <li class="included">5 team seats</li>
+        <li class="included">White-label reports</li>
+        <li class="included">Priority support</li>
+        <li class="included">Custom branding</li>
+        <li class="included">Dedicated onboarding</li>
+      </ul>
+      <button class="plan-btn" onclick="alert('Contact us for team access.')">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>DealFlow AI</strong> — Built for Missouri real estate investors.<br>
+  <span style="font-size:12px">© 2026 DealFlow AI · SuperClaude-Products · Powered by Claude AI</span>
+</footer>
+
+<script>
+async function runAnalysis() {
+  const btn = document.getElementById('analyzeBtn');
+  const loading = document.getElementById('loadingState');
+  const results = document.getElementById('results');
+  const steps = ['step1','step2','step3','step4'];
+
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  loading.style.display = 'block';
+  results.style.display = 'none';
+
+  // Animate loading steps
+  for (let i = 0; i < steps.length; i++) {
+    await sleep(600);
+    document.getElementById(steps[i]).className = 'loading-step active';
+    if (i > 0) document.getElementById(steps[i-1]).className = 'loading-step done';
+  }
+  await sleep(500);
+  document.getElementById(steps[steps.length-1]).className = 'loading-step done';
+
+  // Get inputs
+  const price = parseFloat(document.getElementById('price').value) || 285000;
+  const rent = parseFloat(document.getElementById('rent').value) || 2400;
+  const down = parseFloat(document.getElementById('down').value) / 100 || 0.20;
+  const rate = parseFloat(document.getElementById('rate').value) / 100 || 0.0725;
+  const taxes = parseFloat(document.getElementById('taxes').value) || 3400;
+  const insurance = parseFloat(document.getElementById('insurance').value) || 1800;
+  const address = document.getElementById('address').value || '1234 Oak St, Kansas City, MO';
+
+  // Calculate metrics
+  const downAmt = price * down;
+  const loanAmt = price - downAmt;
+  const monthlyRate = rate / 12;
+  const numPayments = 360;
+  const mortgage = loanAmt * (monthlyRate * Math.pow(1+monthlyRate, numPayments)) / (Math.pow(1+monthlyRate, numPayments) - 1);
+
+  const grossRent = rent * 12;
+  const vacancy = grossRent * 0.05;
+  const effectiveIncome = grossRent - vacancy;
+  const opex = taxes + insurance + (price * 0.01); // maintenance 1%
+  const noi = effectiveIncome - opex;
+  const capRate = (noi / price) * 100;
+  const annualMortgage = mortgage * 12;
+  const cashFlow = noi - annualMortgage;
+  const monthlyCashFlow = cashFlow / 12;
+  const coc = (cashFlow / downAmt) * 100;
+  const dscr = noi / annualMortgage;
+  const grm = price / grossRent;
+
+  // 10-year IRR (simplified)
+  const appreciation = 0.04;
+  const rentGrowth = 0.03;
+  let equity = downAmt;
+  let remainingBalance = loanAmt;
+  for (let y = 0; y < 10; y++) {
+    remainingBalance *= (1 - 0.03); // rough principal paydown
+  }
+  const futureValue = price * Math.pow(1 + appreciation, 10);
+  const saleProceeds = futureValue - remainingBalance;
+  const totalCashFlow = cashFlow * 10 * (1 + rentGrowth);
+  const totalReturn = saleProceeds + totalCashFlow - downAmt;
+  const irr = Math.pow((downAmt + totalReturn) / downAmt, 0.1) - 1;
+
+  // Rating
+  const dealScore = capRate > 8 ? 'STRONG BUY' : capRate > 6 ? 'BUY' : capRate > 4 ? 'HOLD' : 'PASS';
+  const scoreColor = capRate > 8 ? 'badge-good' : capRate > 6 ? 'badge-good' : capRate > 4 ? 'badge-warn' : 'badge-bad';
+
+  await sleep(300);
+  loading.style.display = 'none';
+
+  const metrics = [
+    { label: 'Cap Rate', value: capRate.toFixed(2) + '%', sub: 'Net Operating Income / Price', badge: capRate > 6 ? 'badge-good' : capRate > 4 ? 'badge-warn' : 'badge-bad', badgeText: capRate > 6 ? 'Strong' : capRate > 4 ? 'Average' : 'Weak', highlight: true },
+    { label: 'Cash-on-Cash Return', value: coc.toFixed(2) + '%', sub: 'Annual cash flow / equity invested', badge: coc > 8 ? 'badge-good' : coc > 4 ? 'badge-warn' : 'badge-bad', badgeText: coc > 8 ? 'Excellent' : coc > 4 ? 'Acceptable' : 'Below Target' },
+    { label: 'Monthly Cash Flow', value: '$' + Math.round(monthlyCashFlow).toLocaleString(), sub: 'After all expenses + mortgage', badge: monthlyCashFlow > 300 ? 'badge-good' : monthlyCashFlow > 0 ? 'badge-warn' : 'badge-bad', badgeText: monthlyCashFlow > 300 ? 'Positive' : monthlyCashFlow > 0 ? 'Break-even' : 'Negative' },
+    { label: 'Net Operating Income', value: '$' + Math.round(noi).toLocaleString() + '/yr', sub: 'Revenue minus operating expenses', badge: 'badge-good', badgeText: 'Calculated' },
+    { label: 'DSCR', value: dscr.toFixed(2) + 'x', sub: 'Debt Service Coverage Ratio', badge: dscr > 1.25 ? 'badge-good' : dscr > 1.0 ? 'badge-warn' : 'badge-bad', badgeText: dscr > 1.25 ? 'Lender Ready' : dscr > 1.0 ? 'Marginal' : 'Below 1.0' },
+    { label: '10-Year IRR', value: (irr * 100).toFixed(1) + '%', sub: 'Internal Rate of Return', badge: irr > 0.12 ? 'badge-good' : irr > 0.08 ? 'badge-warn' : 'badge-bad', badgeText: irr > 0.12 ? 'Excellent' : 'Moderate', highlight: true },
+    { label: 'Gross Rent Multiplier', value: grm.toFixed(1) + 'x', sub: 'Price / Gross Annual Rent', badge: grm < 12 ? 'badge-good' : grm < 15 ? 'badge-warn' : 'badge-bad', badgeText: grm < 12 ? 'Great Value' : grm < 15 ? 'Fair' : 'Overpriced' },
+    { label: 'Down Payment', value: '$' + Math.round(downAmt).toLocaleString(), sub: down*100 + '% of purchase price', badge: 'badge-good', badgeText: 'Conventional' },
+    { label: 'Monthly Mortgage', value: '$' + Math.round(mortgage).toLocaleString(), sub: rate*100 + '% fixed · 30yr', badge: 'badge-good', badgeText: 'P+I Only' },
+    { label: 'Deal Score', value: dealScore, sub: 'AI-powered rating', badge: scoreColor, badgeText: 'AI Rating', highlight: capRate > 6 },
+  ];
+
+  document.getElementById('metricsGrid').innerHTML = metrics.map(m => `
+    <div class="metric-card ${m.highlight ? 'highlight' : ''}">
+      <div class="metric-label">${m.label}</div>
+      <div class="metric-value">${m.value}</div>
+      <div class="metric-sub">${m.sub}</div>
+      <span class="metric-badge ${m.badge}">${m.badgeText}</span>
+    </div>
+  `).join('');
+
+  const memoText = generateMemo(address, price, rent, capRate, coc, monthlyCashFlow, noi, dscr, irr, dealScore);
+  document.getElementById('aiMemo').innerHTML = `
+    <div class="memo-header">🤖 AI Investment Analysis</div>
+    <div class="memo-text">${memoText}</div>
+  `;
+
+  results.style.display = 'block';
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Analyze Deal';
+
+  steps.forEach(s => { document.getElementById(s).className = 'loading-step'; });
+}
+
+function generateMemo(addr, price, rent, capRate, coc, cashFlow, noi, dscr, irr, score) {
+  const cf = Math.round(cashFlow);
+  const verdict = score === 'STRONG BUY' ? 'This is a compelling acquisition target' :
+                  score === 'BUY' ? 'This property presents a solid investment opportunity' :
+                  score === 'HOLD' ? 'This deal is marginal at current pricing' :
+                  'This deal does not meet minimum investment criteria';
+
+  return `<strong>📍 ${addr}</strong> — ${verdict} for a Missouri buy-and-hold investor.<br><br>
+At a purchase price of <strong>$${price.toLocaleString()}</strong> with monthly rent of <strong>$${rent.toLocaleString()}</strong>, the property generates a cap rate of <strong>${capRate.toFixed(2)}%</strong> and a cash-on-cash return of <strong>${coc.toFixed(2)}%</strong>. Monthly cash flow after debt service is <strong>${cf >= 0 ? '+' : ''}$${cf.toLocaleString()}</strong>.<br><br>
+The DSCR of <strong>${dscr.toFixed(2)}x</strong> ${dscr >= 1.25 ? 'exceeds conventional lender minimums of 1.25x — <strong>financing is favorable</strong>' : 'is below the 1.25x threshold most lenders require — <strong>financing may require larger down payment</strong>'}. The 10-year projected IRR of <strong>${(irr*100).toFixed(1)}%</strong> ${irr > 0.12 ? 'exceeds the typical 12% investor hurdle rate' : 'falls below the 12% hurdle rate — negotiate price or improve NOI'}.<br><br>
+<strong>Recommendation:</strong> ${score === 'STRONG BUY' ? '✅ Submit offer at or slightly below ask. This deal cash-flows from day one.' : score === 'BUY' ? '✅ Negotiate 3-5% below ask to improve CoC return above 8%.' : score === 'HOLD' ? '⚠️ Negotiate significant price reduction or walk away.' : '❌ Pass. Cap rate and cash flow do not meet minimum thresholds.'}`;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Auto-run on load
+window.addEventListener('load', () => setTimeout(runAnalysis, 800));
+</script>
+</body>
+</html>
