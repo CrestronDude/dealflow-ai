@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root { --bg: #0a0e0a; --fg: #e8f0e8; --green: #4ade80; --green-dark: #16a34a; --border: #1a2e1a; --surface: #0d1a0d; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: Georgia, serif; }
