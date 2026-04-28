@@ -6,7 +6,7 @@ export default function Home() {
       {/* NAV */}
       <nav style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1.25rem 2rem",borderBottom:"1px solid #1a2e1a",background:"#0a0e0ae6",backdropFilter:"blur(8px)",position:"sticky",top:0,zIndex:50}}>
         <div style={{fontWeight:700,fontSize:"1.25rem",letterSpacing:"-0.02em"}}>
-          ⚡ DealFlow<span style={{color:"#4ade80"}}>AI</span>
+          ⚡ MidwestDealScout<span style={{color:"#4ade80"}}>AI</span>
         </div>
         <div style={{display:"flex",gap:"1.5rem",alignItems:"center",fontFamily:"system-ui,sans-serif"}}>
           <a href="#features" style={{color:"#86efac",textDecoration:"none",fontSize:"0.9rem"}}>Features</a>
@@ -101,7 +101,7 @@ export default function Home() {
       </section>
 
       <footer style={{borderTop:"1px solid #1a2e1a",padding:"2rem",textAlign:"center",color:"#4d7a4d",fontSize:"0.8rem",fontFamily:"system-ui,sans-serif"}}>
-        © 2026 DealFlow AI · Built for Midwest real estate investors · Privacy · Terms
+        © 2026 MidwestDealScout · Built for Midwest real estate investors · Privacy · Terms
       </footer>
     </main>
   )

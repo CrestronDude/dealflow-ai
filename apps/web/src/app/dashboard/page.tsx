@@ -5,7 +5,7 @@ export default function Dashboard() {
     <main style={{fontFamily:"system-ui,sans-serif",background:"#0a0e0a",color:"#e8f0e8",minHeight:"100vh"}}>
       <nav style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1rem 2rem",borderBottom:"1px solid #1a2e1a"}}>
         <Link href="/" style={{fontWeight:700,fontSize:"1.1rem",textDecoration:"none",color:"#e8f0e8",fontFamily:"Georgia,serif"}}>
-          ⚡ DealFlow<span style={{color:"#4ade80"}}>AI</span>
+          ⚡ MidwestDealScout<span style={{color:"#4ade80"}}>AI</span>
         </Link>
         <div style={{display:"flex",gap:"1.5rem",alignItems:"center"}}>
           <Link href="/analyze" style={{color:"#86efac",textDecoration:"none",fontSize:"0.875rem"}}>New Analysis</Link>

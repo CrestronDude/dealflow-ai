@@ -22,11 +22,11 @@
 
 ---
 
-## 🏆 PRODUCT: DealFlow AI
+## 🏆 PRODUCT: MidwestDealScout
 **"Analyze any real estate deal in 60 seconds. Know before you go."**
 
 Target: RealWealth / investing1984 / Missouri-based investors, syndicators, BRRRR operators, finance/trading audience
-Gap: Enterprise tools = $500-2k/mo. Simple tools = no AI. DealFlow AI = $49-149/mo sweet spot.
+Gap: Enterprise tools = $500-2k/mo. Simple tools = no AI. MidwestDealScout = $49-149/mo sweet spot.
 
 ### Pricing
 | Tier | Price | Key Feature |

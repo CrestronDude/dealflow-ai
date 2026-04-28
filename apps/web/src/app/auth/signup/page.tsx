@@ -46,7 +46,7 @@ export default function Signup() {
       <div style={{ width: '100%', maxWidth: '380px', padding: '0 1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link href="/" style={{ textDecoration: 'none', color: '#e8f0e8', fontFamily: 'Georgia,serif', fontWeight: 700, fontSize: '1.25rem' }}>
-            ⚡ DealFlow<span style={{ color: '#4ade80' }}>AI</span>
+            ⚡ MidwestDealScout<span style={{ color: '#4ade80' }}>AI</span>
           </Link>
           <p style={{ color: '#6b9e6b', marginTop: '0.5rem', fontSize: '0.9rem' }}>Start analyzing deals free</p>
         </div>

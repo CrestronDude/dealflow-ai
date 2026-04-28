@@ -6,7 +6,7 @@ export default function AnalyzePage() {
     <main style={{fontFamily:"'Georgia',serif",background:"#0a0e0a",color:"#e8f0e8",minHeight:"100vh"}}>
       <nav style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"1rem 2rem",borderBottom:"1px solid #1a2e1a"}}>
         <Link href="/" style={{fontWeight:700,fontSize:"1.1rem",textDecoration:"none",color:"#e8f0e8"}}>
-          ⚡ DealFlow<span style={{color:"#4ade80"}}>AI</span>
+          ⚡ MidwestDealScout<span style={{color:"#4ade80"}}>AI</span>
         </Link>
         <div style={{fontSize:"0.8rem",color:"#4d7a4d",fontFamily:"system-ui,sans-serif"}}>3 free analyses remaining</div>
       </nav>
