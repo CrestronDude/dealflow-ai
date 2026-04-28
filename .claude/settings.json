@@ -1,0 +1,14 @@
+{
+  "workspace": "~/Desktop/SuperClaude-Products",
+  "product": "DealFlow AI",
+  "zapierConnector": "superclaude-everything",
+  "githubRepo": "CrestronDude/dealflow-ai",
+  "deployTarget": "vercel",
+  "revenueTarget": { "day14": 1000, "day30": 10000 },
+  "routines": {
+    "daily_8am": "market-research-competitor-scan-content-ideas",
+    "every_6hrs": "tests-autofix-security-scan",
+    "weekly_mon": "mrr-report",
+    "weekly_fri": "growth-experiments"
+  }
+}

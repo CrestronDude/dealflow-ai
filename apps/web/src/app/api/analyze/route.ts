@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { zapierFire } from '@/lib/zapier'
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
       max_tokens: 800,
       messages: [{
         role: 'user',
-        content: `You are an expert real estate investment analyst for Midwest/Missouri markets. Analyze this deal concisely.
+        content: `You are an expert real estate investment analyst for Midwest/Missouri markets. Analyze this deal.
 
 PROPERTY: ${address} | Type: ${propertyType}
 Purchase: $${purchasePrice.toLocaleString()} | Down: ${downPaymentPct}% | Rate: ${interestRate}% | Rent: $${monthlyRent}/mo
@@ -40,22 +41,22 @@ Purchase: $${purchasePrice.toLocaleString()} | Down: ${downPaymentPct}% | Rate: 
 METRICS: Cap Rate: ${capRate.toFixed(2)}% | CoC: ${cashOnCash.toFixed(2)}% | Cash Flow: $${monthlyCashFlow.toFixed(0)}/mo | DSCR: ${dscr.toFixed(2)} | GRM: ${grm.toFixed(1)}
 
 Respond ONLY with valid JSON (no markdown):
-{"dealScore":78,"verdict":"BUY","summary":"2-3 sentences","strengths":["s1","s2","s3"],"redFlags":["r1","r2"],"recommendations":"2 sentences","marketContext":"1 sentence about midwest market","exitStrategies":["e1","e2"]}`
+{"dealScore":78,"verdict":"BUY","summary":"2-3 sentences","strengths":["s1","s2","s3"],"redFlags":["r1","r2"],"recommendations":"2 sentences","marketContext":"1 sentence","exitStrategies":["e1","e2"]}`
       }]
     })
 
-    const rawText = (msg.content[0] as any).text.trim()
-    const ai = JSON.parse(rawText)
+    const ai = JSON.parse((msg.content[0] as any).text.trim())
+    const metrics = {
+      capRate: +capRate.toFixed(2), cashOnCash: +cashOnCash.toFixed(2),
+      monthlyCashFlow: +monthlyCashFlow.toFixed(0), annualCashFlow: +(monthlyCashFlow*12).toFixed(0),
+      noi: +noi.toFixed(0), grm: +grm.toFixed(1), dscr: +dscr.toFixed(2),
+      monthlyMortgage: +monthlyMortgage.toFixed(0), downPayment, loanAmount
+    }
 
-    return NextResponse.json({
-      metrics: {
-        capRate: +capRate.toFixed(2), cashOnCash: +cashOnCash.toFixed(2),
-        monthlyCashFlow: +monthlyCashFlow.toFixed(0), annualCashFlow: +(monthlyCashFlow*12).toFixed(0),
-        noi: +noi.toFixed(0), grm: +grm.toFixed(1), dscr: +dscr.toFixed(2),
-        monthlyMortgage: +monthlyMortgage.toFixed(0), downPayment, loanAmount
-      },
-      ai
-    })
+    // Fire Zapier "superclaude-everything" — logs deal to Google Sheets, alerts on high scores
+    await zapierFire('deal', { address, dealScore: ai.dealScore, verdict: ai.verdict, capRate: metrics.capRate, monthlyCashFlow: metrics.monthlyCashFlow })
+
+    return NextResponse.json({ metrics, ai })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }

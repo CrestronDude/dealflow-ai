@@ -1,0 +1,11 @@
+{
+  "agents": [
+    { "id": "product-architect", "name": "Product Architect", "status": "complete", "owns": ["docs/schema.sql", "docs/architecture.md"] },
+    { "id": "frontend-engineer", "name": "Frontend Engineer", "status": "complete", "owns": ["apps/web/src/app/page.tsx", "apps/web/src/app/analyze", "apps/web/src/app/dashboard", "apps/web/src/components"] },
+    { "id": "backend-engineer", "name": "Backend Engineer", "status": "complete", "owns": ["apps/web/src/app/api", "apps/web/src/lib", "apps/web/src/middleware.ts"] },
+    { "id": "monetization-expert", "name": "Monetization Expert", "status": "complete", "owns": ["apps/web/src/app/api/stripe", "apps/web/src/lib/stripe.ts"] },
+    { "id": "growth-hacker", "name": "Growth Hacker", "status": "active", "owns": ["docs/launch-checklist.md", "docs/growth/"] },
+    { "id": "qa-devops", "name": "QA/DevOps", "status": "active", "owns": [".github/workflows", "apps/web/vercel.json"] },
+    { "id": "content-creator", "name": "Content Creator", "status": "active", "owns": ["docs/zapier-sequences/"] }
+  ]
+}
