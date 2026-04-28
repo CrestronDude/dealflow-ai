@@ -11,6 +11,7 @@ export default function Home() {
         <div style={{display:"flex",gap:"1.5rem",alignItems:"center",fontFamily:"system-ui,sans-serif"}}>
           <a href="#features" style={{color:"#86efac",textDecoration:"none",fontSize:"0.9rem"}}>Features</a>
           <a href="#pricing" style={{color:"#86efac",textDecoration:"none",fontSize:"0.9rem"}}>Pricing</a>
+          <Link href="/auth/login" style={{color:"#86efac",textDecoration:"none",fontSize:"0.875rem"}}>Sign In</Link>
           <Link href="/analyze" style={{background:"#16a34a",color:"white",padding:"0.5rem 1.25rem",borderRadius:"6px",textDecoration:"none",fontSize:"0.875rem",fontWeight:600}}>Try Free →</Link>
         </div>
       </nav>
