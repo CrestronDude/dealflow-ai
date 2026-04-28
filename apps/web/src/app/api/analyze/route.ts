@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { zapierFire } from '@/lib/zapier'
+
+async function fireZapier(payload: Record<string, unknown>) {
+  const url = process.env.ZAPIER_HOOK_DEAL
+  if (!url || url.includes('YOUR_')) return
+  fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }).catch(()=>{})
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,7 +38,7 @@ export async function POST(req: NextRequest) {
       max_tokens: 800,
       messages: [{
         role: 'user',
-        content: `You are an expert real estate investment analyst for Midwest/Missouri markets. Analyze this deal.
+        content: `You are an expert real estate investment analyst for Midwest/Missouri markets. Analyze this deal concisely.
 
 PROPERTY: ${address} | Type: ${propertyType}
 Purchase: $${purchasePrice.toLocaleString()} | Down: ${downPaymentPct}% | Rate: ${interestRate}% | Rent: $${monthlyRent}/mo
@@ -41,11 +46,13 @@ Purchase: $${purchasePrice.toLocaleString()} | Down: ${downPaymentPct}% | Rate: 
 METRICS: Cap Rate: ${capRate.toFixed(2)}% | CoC: ${cashOnCash.toFixed(2)}% | Cash Flow: $${monthlyCashFlow.toFixed(0)}/mo | DSCR: ${dscr.toFixed(2)} | GRM: ${grm.toFixed(1)}
 
 Respond ONLY with valid JSON (no markdown):
-{"dealScore":78,"verdict":"BUY","summary":"2-3 sentences","strengths":["s1","s2","s3"],"redFlags":["r1","r2"],"recommendations":"2 sentences","marketContext":"1 sentence","exitStrategies":["e1","e2"]}`
+{"dealScore":78,"verdict":"BUY","summary":"2-3 sentences","strengths":["s1","s2","s3"],"redFlags":["r1","r2"],"recommendations":"2 sentences","marketContext":"1 sentence about midwest market","exitStrategies":["e1","e2"]}`
       }]
     })
 
-    const ai = JSON.parse((msg.content[0] as any).text.trim())
+    const rawText = (msg.content[0] as {text:string}).text.trim()
+    const ai = JSON.parse(rawText)
+
     const metrics = {
       capRate: +capRate.toFixed(2), cashOnCash: +cashOnCash.toFixed(2),
       monthlyCashFlow: +monthlyCashFlow.toFixed(0), annualCashFlow: +(monthlyCashFlow*12).toFixed(0),
@@ -53,8 +60,8 @@ Respond ONLY with valid JSON (no markdown):
       monthlyMortgage: +monthlyMortgage.toFixed(0), downPayment, loanAmount
     }
 
-    // Fire Zapier "superclaude-everything" — logs deal to Google Sheets, alerts on high scores
-    await zapierFire('deal', { address, dealScore: ai.dealScore, verdict: ai.verdict, capRate: metrics.capRate, monthlyCashFlow: metrics.monthlyCashFlow })
+    // Fire Zapier async (non-blocking)
+    fireZapier({ address, dealScore: ai.dealScore, verdict: ai.verdict, capRate: metrics.capRate, cashOnCash: metrics.cashOnCash, monthlyCashFlow: metrics.monthlyCashFlow })
 
     return NextResponse.json({ metrics, ai })
   } catch (e: any) {
