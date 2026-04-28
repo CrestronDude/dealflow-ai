@@ -96,8 +96,8 @@ SuperClaude-Products/
 |-----|-------|--------|
 | 1 | Foundation: repo, schema, landing, APIs | ✅ DONE |
 | 2 | Auth + deal analyzer E2E | ✅ DONE |
-| 3 | GitHub push + Vercel deploy live | 🔥 NOW |
-| 4 | Supabase live + Stripe connected | ⏳ |
+| 3 | GitHub push + Vercel deploy live | ✅ DONE |
+| 4 | Supabase live + Stripe connected | 🔥 NOW |
 | 5 | Zapier: welcome email, onboarding, nurture | ⏳ |
 | 6 | QA + Sentry + PostHog analytics | ⏳ |
 | 7 | LAUNCH: Product Hunt, Twitter, Reddit, email | ⏳ |
