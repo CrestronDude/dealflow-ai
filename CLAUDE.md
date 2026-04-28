@@ -3,22 +3,32 @@
 
 ---
 
-## 🔒 WORKSPACE RULES (HIGHEST PRIORITY — NEVER BREAK)
+## 🔒 WORKSPACE RULES (STRICT — NEVER BREAK)
 - Permanently working inside: ~/Desktop/SuperClaude-Products/
-- Every file MUST be inside this folder or subfolders
-- Always read this file first on every /init or new session
-- Use Computer Use for filesystem, terminal, git, and browser
-- Git commit after every major milestone
+- Every file MUST be inside this folder or its subfolders
+- Always read this file FIRST on every session/init
+- Use Computer Use for ALL filesystem, terminal, git, browser actions
+- Git commit + push after every major milestone
+- Generate live Artifacts, previews, Figma-style mockups on every feature
+- Obsess over UX, retention, viral loops, automated sales
 
 ---
 
-## 🏆 WINNING PRODUCT: DealFlow AI
+## 🔌 CONNECTED TOOLS (Use aggressively and creatively)
+- **Zapier MCP** ("superclaude-everything") — Gmail, Sheets, Stripe, Shopify, Slack, Notion, LinkedIn, Calendar, CRM, 9,000+ apps
+- **Git / GitHub MCP** — repo management, commits, branches, PRs, issues  
+- **Computer Use** — filesystem, terminal, browser, screenshots, app control
+- **Claude in Chrome** — browser automation, web research
+
+---
+
+## 🏆 PRODUCT: DealFlow AI
 **"Analyze any real estate deal in 60 seconds. Know before you go."**
 
-Target: RealWealth/investing1984 — Missouri/Midwest investors, syndicators, BRRRR operators
+Target: RealWealth / investing1984 / Missouri-based investors, syndicators, BRRRR operators, finance/trading audience
 Gap: Enterprise tools = $500-2k/mo. Simple tools = no AI. DealFlow AI = $49-149/mo sweet spot.
 
-### Pricing Tiers
+### Pricing
 | Tier | Price | Key Feature |
 |------|-------|-------------|
 | Free | $0 | 3 deal analyses |
@@ -35,9 +45,9 @@ Gap: Enterprise tools = $500-2k/mo. Simple tools = no AI. DealFlow AI = $49-149/
 - Next.js 15 + Tailwind + shadcn/ui
 - Supabase (Postgres + Auth + Storage)
 - Claude API (claude-sonnet-4-20250514 — deal analysis engine)
-- Stripe (subscriptions, 4 tiers)
+- Stripe (subscriptions)
 - Vercel (deploy, auto from GitHub)
-- Zapier (all automations — 9,000+ apps)
+- Zapier (ALL automations via "superclaude-everything")
 - Resend (transactional email)
 
 ---
@@ -45,78 +55,71 @@ Gap: Enterprise tools = $500-2k/mo. Simple tools = no AI. DealFlow AI = $49-149/
 ## 📁 PROJECT STRUCTURE
 ```
 SuperClaude-Products/
-├── CLAUDE.md              ← YOU ARE HERE (master rules)
+├── CLAUDE.md              ← Master rules (update frequently)
 ├── CLAUDE.local.md        ← Private keys (gitignored)
-├── .gitignore
+├── .claude/               ← Skills, subagents, settings
 ├── docs/
-│   ├── schema.sql         ← Supabase DB schema
+│   ├── schema.sql
 │   ├── architecture.md
-│   └── launch-checklist.md
+│   ├── launch-checklist.md
+│   └── zapier-sequences/
 └── apps/web/              ← Next.js 15 app
-    ├── src/app/
-    │   ├── page.tsx       ← Landing page
-    │   ├── analyze/       ← Deal analyzer UI
-    │   ├── dashboard/     ← Portfolio dashboard
-    │   └── api/
-    │       ├── analyze/   ← Claude AI deal scorer
-    │       ├── waitlist/  ← Email capture
-    │       └── stripe/    ← Subscription checkout
-    ├── src/components/deal/DealAnalyzer.tsx
-    └── src/lib/{supabase,stripe,utils}.ts
+    └── src/
+        ├── app/
+        │   ├── page.tsx           ← Landing page
+        │   ├── analyze/           ← Deal analyzer UI  
+        │   ├── dashboard/         ← Portfolio dashboard
+        │   ├── auth/login|signup/ ← Auth pages
+        │   └── api/analyze|waitlist|stripe/
+        ├── components/deal/DealAnalyzer.tsx
+        ├── lib/{supabase,stripe,utils}.ts
+        └── middleware.ts
 ```
 
 ---
 
 ## 🤖 AGENT TEAM
-| Agent | Responsibility | Status |
-|-------|---------------|--------|
-| 🏗 Product Architect | DB schema, API design | ✅ Complete |
-| 🎨 Frontend Engineer | UI/UX, React components | ✅ Complete |
-| ⚙️ Backend Engineer | API routes, Supabase, Stripe | ✅ Complete |
-| 💰 Monetization Expert | Pricing, Stripe checkout | ✅ Complete |
-| 📈 Growth Hacker | SEO, viral loops, launch | 🔄 Day 4-7 |
+| Agent | Role | Status |
+|-------|------|--------|
+| 🏗 Product Architect | DB schema, API design | ✅ Done |
+| 🎨 Frontend Engineer | UI/UX, React, live previews | ✅ Done |
+| ⚙️ Backend Engineer | API routes, Supabase, Stripe | ✅ Done |
+| 💰 Monetization Expert | Pricing, checkout, upsells | ✅ Done |
+| 📈 Growth Hacker | SEO, viral loops, launch channels | 🔄 Active |
 | 🔧 QA/DevOps | CI/CD, Vercel, monitoring | 🔄 Day 6 |
-| ✍️ Content Creator | Email sequences, copy | 🔄 Day 5 |
+| ✍️ Content Creator | Email sequences, copy, social | 🔄 Day 5 |
 
 ---
 
 ## 📋 7-DAY BUILD PLAN
 | Day | Focus | Status |
 |-----|-------|--------|
-| 1 | Foundation: Repo, schema, landing, APIs | ✅ DONE |
-| 2 | Supabase live + deal analyzer E2E tested | ⏳ NEXT |
-| 3 | Auth (Supabase) + Stripe checkout live | ⏳ |
-| 4 | Deploy to Vercel + custom domain | ⏳ |
+| 1 | Foundation: repo, schema, landing, APIs | ✅ DONE |
+| 2 | Auth + deal analyzer E2E | ✅ DONE |
+| 3 | GitHub push + Vercel deploy live | 🔥 NOW |
+| 4 | Supabase live + Stripe connected | ⏳ |
 | 5 | Zapier: welcome email, onboarding, nurture | ⏳ |
 | 6 | QA + Sentry + PostHog analytics | ⏳ |
-| 7 | LAUNCH: PH, Twitter, Reddit, email blast | ⏳ |
+| 7 | LAUNCH: Product Hunt, Twitter, Reddit, email | ⏳ |
 
 ---
 
-## ⏰ SCHEDULED ROUTINES
-- Daily 8AM: Market research + competitor scan + 3 content ideas
-- Every 6hrs: Tests + auto-fix lint + security scan
-- Weekly Mon: MRR report (signups, churn, conversions)
-- Weekly Fri: Growth experiment results + next A/B tests
+## ⏰ SCHEDULED ROUTINES (Zapier "superclaude-everything" + Computer Use)
+- **Daily 8AM CT**: Market research + competitor scan + 3 content ideas → GitHub Issue
+- **Every 6hrs**: Run tests + auto-fix bugs + security scan
+- **Weekly Mon**: Full MRR report (signups, churn, conversions, experiments)
+- **Weekly Fri**: Growth experiment results + next week A/B tests
 
 ---
 
-## 🔌 CONNECTED TOOLS
-- ✅ Zapier MCP (Claude MCP Server — Gmail, Outlook, Calendar, Excel, Office 365)
-- ✅ GitHub Integration (Claude connector)
-- ✅ Computer Use (filesystem, terminal, browser)
-- ✅ Claude in Chrome (browser automation)
+## 📝 RESPONSE FORMAT (Every response ends with)
+```
+📊 PROGRESS: [what completed]
+🔀 GIT STATUS: [branch · commit · clean/dirty]
+⏭ NEXT ACTIONS: [3 specific next steps + time estimate]
+✅ APPROVALS NEEDED: [anything requiring your decision]
+```
 
 ---
 
-## ⚙️ /init CHECKLIST (Run on every session start)
-1. Read CLAUDE.md ✅
-2. Run git status + git log
-3. Run TypeScript check
-4. Report workspace status
-5. Resume from last milestone
-6. State next 3 actions
-
----
-
-*Updated: 2026-04-28 | /init complete | Super Claude Product OS v2.1*
+*Updated: 2026-04-28 | Instructions from uploaded CLAUDE.md | Super Claude Product OS v2.1*
