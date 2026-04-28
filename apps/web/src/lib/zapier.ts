@@ -7,12 +7,17 @@ export async function fireZapier(event: ZapierEvent, payload: Record<string, unk
     upgrade: process.env.ZAPIER_HOOK_UPGRADE,
   }
   const url = hooks[event]
-  if (!url || url.includes('YOUR_')) return
+  // Skip if not configured
+  if (!url || url.includes('YOUR_') || url.includes('placeholder')) return
   try {
-    await fetch(url, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event, timestamp: new Date().toISOString(), ...payload }),
     })
-  } catch (e) { console.error('Zapier webhook failed:', e) }
+    if (!res.ok) console.error(`Zapier ${event} returned ${res.status}`)
+  } catch (e) {
+    console.error('Zapier webhook failed silently:', e)
+    // Non-blocking — never crash the main request
+  }
 }
