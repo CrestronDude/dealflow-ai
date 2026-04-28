@@ -123,3 +123,11 @@ SuperClaude-Products/
 ---
 
 *Updated: 2026-04-28 | Instructions from uploaded CLAUDE.md | Super Claude Product OS v2.1*
+
+---
+## 🚀 DEPLOYMENT STATUS
+- Vercel project: dealflow-ai (steven-sutherlands-projects)
+- GitHub repo: CrestronDude/dealflow-ai  
+- Root directory: apps/web
+- Auto-deploy: ON — every push to master triggers deploy
+- Last deploy trigger: 2026-04-28
