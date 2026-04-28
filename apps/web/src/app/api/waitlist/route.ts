@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { zapierFire } from '@/lib/zapier'
+import { fireZapier } from '@/lib/zapier'
 
 export async function POST(req: NextRequest) {
   const { email, name, source } = await req.json()
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   if (error && error.code !== '23505') return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Fire Zapier "superclaude-everything" — triggers welcome email + CRM + Google Sheets
-  await zapierFire('signup', { email, name, source })
+  await fireZapier('signup', { email, name, source })
 
   return NextResponse.json({ success: true })
 }

@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-
-async function fireZapier(payload: Record<string, unknown>) {
-  const url = process.env.ZAPIER_HOOK_DEAL
-  if (!url || url.includes('YOUR_')) return
-  fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }).catch(()=>{})
-}
+import { fireZapier } from '@/lib/zapier'
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,7 +56,7 @@ Respond ONLY with valid JSON (no markdown):
     }
 
     // Fire Zapier async (non-blocking)
-    fireZapier({ address, dealScore: ai.dealScore, verdict: ai.verdict, capRate: metrics.capRate, cashOnCash: metrics.cashOnCash, monthlyCashFlow: metrics.monthlyCashFlow })
+    fireZapier('deal_analyzed', { address, dealScore: ai.dealScore, verdict: ai.verdict, capRate: metrics.capRate, monthlyCashFlow: metrics.monthlyCashFlow })
 
     return NextResponse.json({ metrics, ai })
   } catch (e: any) {
