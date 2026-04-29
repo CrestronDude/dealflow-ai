@@ -22,6 +22,7 @@ export default function DealAnalyzer() {
   const [result, setResult] = useState<{ metrics: Metrics; ai: AI } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [warning, setWarning] = useState('')
 
   const analyze = async () => {
     setLoading(true); setError('')
@@ -29,6 +30,8 @@ export default function DealAnalyzer() {
       const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
       const data = await res.json()
       if (data.error) { setError(data.error); return }
+      if (data.warning) setWarning(data.warning)
+      else setWarning('')
       setResult(data)
     } catch(e: any) { setError(e.message) }
     finally { setLoading(false) }
@@ -89,6 +92,11 @@ export default function DealAnalyzer() {
             {loading ? '⚡ Analyzing...' : '⚡ Analyze Deal'}
           </button>
           {error && <p style={{ color: '#f87171', fontSize: '0.8rem', marginTop: '0.5rem' }}>{error}</p>}
+          {warning && (
+            <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.875rem', background: '#1a1200', border: '1px solid #7c5e00', borderRadius: '6px', fontSize: '0.78rem', color: '#fbbf24', lineHeight: 1.5 }}>
+              ⚠️ {warning}
+            </div>
+          )}
         </div>
 
         {/* RESULTS PANEL */}
